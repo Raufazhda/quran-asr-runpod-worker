@@ -19,6 +19,7 @@ import sentencepiece as spm
 import torch
 import torchaudio
 from fastapi import FastAPI, HTTPException, Response, WebSocket, WebSocketDisconnect, status
+from fastapi.responses import JSONResponse
 from huggingface_hub import snapshot_download
 
 MODEL_ID = "Muno459/fastconformer-quran-streaming"
@@ -188,10 +189,10 @@ def health() -> dict[str, object]:
 
 
 @app.get("/ping")
-def ping() -> Response | dict[str, str]:
+def ping() -> Response:
     """Readiness endpoint: 204 while loading, 200 only when streaming can start."""
     if runtime.ready:
-        return {"status": "ready"}
+        return JSONResponse(status_code=status.HTTP_200_OK, content={"status": "ready"})
     if runtime.load_error:
         raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="model failed to load")
     return Response(status_code=status.HTTP_204_NO_CONTENT)
